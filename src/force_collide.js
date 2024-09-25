@@ -20,7 +20,35 @@ export function makeChart(data, width) {
         .attr("fill-opacity", .1)
 
     group.attr("transform", `translate(${width / 2},${height / 2})`)
-    let text = group.selectAll("text").data(nodes).join("text").attr("x", 0).attr("y", 0).text(d => d.group)
+    // the goal is to split the text on the _ and have the separate lines be included together but on different lines
+    // make a mapping between the words and the circle i's index values so that we can get their x,y positions later
+    let chart_names= nodes.map(e=> e.group)
+
+    let mapping = {}
+    let word_index  =0
+    let circle_index = 0
+    let words = [] 
+    for (let node of nodes) {
+        let ctype = node.group
+        // this helps us make sure to offset the word a bit in y within the circle later
+        let num_word =0
+        // split the words by the _ in between them
+        let words = ctype.split(/_/g)
+        let total_words = words.length
+        for (let word of words) {
+            mapping[word_index] = {circle_index,num_word,total_words}
+            // increment the word index so that overall the mapping is maintained
+            word_index+=1
+            // if we have tree_plot then num_word would take on the two values 0,1 which we can use in the tick loop to shift by y
+            num_word+=1
+            words.push(word)
+        }
+        circle_index+=1
+    }
+    // establish a shift value for the text within a circle
+    let shift_y = 10
+    console.log(mapping)
+    let text = group.selectAll("text").data(words).join("text").attr("x", 0).attr("y", 0).text(d => d)
 
     // let textSpan = text.append("tspan").text(d=> d.group).attr("x",0).attr("y",0)
     // sanity check
@@ -53,9 +81,20 @@ export function makeChart(data, width) {
 
     function ticked() {
         circles.attr("cx", d => d.x).attr("cy", d => d.y)
-        text.attr("x", d => d.x).attr("y", d => {
-            d.y
-        })
+        // in here we have to convert from the word index back to the circle index 
+        // text.attr("x", (d,word_index) => {
+        //     let word_data = mapping[word_index]
+        //     let circle_data = nodes[word_data.circle_index]
+        //     return circle_data.x
+        // }).attr("y", (d,word_index) => {
+        //     let word_data = mapping[word_index]
+        //     let circle_data = nodes[word_data.circle_index]
+        //     // control a bit for the number of words potentially extending out past the bottom of the circle , this is our attempt to center in the middle
+        //     // if we know how many words our little chart type is split into then we know that the shift_y will occur that many times
+        //     // so instead we need to move in the opposite direction half that total amoutn of shifting and we will be centered
+        //     let half_total_shift = word_data.total_words * shift_y/1.5
+        //     return circle_data.y + word_data.num_word*shift_y  - half_total_shift
+        // })
     }
 
     return svg.node();
