@@ -1,6 +1,6 @@
 ---
 toc: false
-title: Card test
+title: Splash Remake
 sql:
   publications: ./data/new_layout.db
 ---
@@ -8,11 +8,8 @@ sql:
 import {makeForceCollide,makeChart} from "./force_collide.js"
 ```
 
-```sql
-SELECT * FROM publications.figure_property;
-```
 
-```sql id=type_counts display
+```sql id=type_counts
 SELECT string_value as 'group',COUNT(*) as 'num' FROM publications.figure_property GROUP BY string_value;
 ```
 

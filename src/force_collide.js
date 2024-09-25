@@ -18,8 +18,8 @@ export function makeChart(data, width) {
         .attr("r", d => d.r)
         .style("fill", (d, i) => color(i))
     group.attr("transform", `translate(${width / 2},${height / 2})`)
-    let text = group.selectAll("text").data(nodes).join("text")
-    let textSpan = text.selectAll("text").data(nodes).join("tspan").attr("x",d=> d.x).attr("y",d=>d.y).text(d=> d.group)
+    let text = circles.append("text")
+    let textSpan = text.append("tspan").text(d=> d.group)
 
     // set the nodes up with some fx to start with
 
