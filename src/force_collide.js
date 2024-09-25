@@ -16,10 +16,16 @@ export function makeChart(data, width) {
     circles.attr("cx", d => 0)
         .attr("cy", d => 0)
         .attr("r", d => d.r)
-        .style("fill", (d, i) => color(i))
+        .attr("stroke", (d, i) => color(i))
+        .attr("fill-opacity", .1)
+
     group.attr("transform", `translate(${width / 2},${height / 2})`)
-    let text = circles.append("text")
-    let textSpan = text.append("tspan").text(d=> d.group)
+    let text = group.selectAll("text").data(nodes).join("text").attr("x", 0).attr("y", 0).text(d => d.group)
+
+    // let textSpan = text.append("tspan").text(d=> d.group).attr("x",0).attr("y",0)
+    // sanity check
+    // let test_text = svg.append("text")
+    // let test_span = svg.append("text")
 
     // set the nodes up with some fx to start with
 
@@ -47,6 +53,9 @@ export function makeChart(data, width) {
 
     function ticked() {
         circles.attr("cx", d => d.x).attr("cy", d => d.y)
+        text.attr("x", d => d.x).attr("y", d => {
+            d.y
+        })
     }
 
     return svg.node();
