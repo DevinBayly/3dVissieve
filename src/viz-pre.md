@@ -415,7 +415,7 @@ import * as duckdb from "npm:@duckdb/duckdb-wasm";
 // import libs
 
 // import data
-const db = await DuckDBClient.of({base: FileAttachment("/data/publications_princeton.db")});
+const db = await DuckDBClient.of({base: FileAttachment("/data/new_layout.db")});
 // import data
 
 // data extraction by the defined data function 
@@ -504,9 +504,9 @@ async function countChartPos(db) {
         const resultsArray = results.toArray();
         const output = resultsArray.map(row => ({
             idx: row.int_value,
-            x: row.xPos/10,
+            x: row.xPos,
             y: row.yPos,
-            z: row.zPos/10,
+            z: row.zPos,
             count: row.count,
             label: visualizationTypes[row.int_value]
         }));
@@ -584,7 +584,7 @@ let sprites = [];
          "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF",
           "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF", "#E7EBEF"
     ];
-const scaleRatio = 2.3;
+const scaleRatio = 5;
 
 const raycaster = new THREE.Raycaster(); 
 const mouse = new THREE.Vector2();
@@ -734,9 +734,9 @@ generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
     spriteMaterial.map.offset.set(atlasX * width, 1 - (atlasY + 1) * height);
 
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.position.set(item.xPos / 10, item.yPos/100, item.zPos /10);
-    sprite.scale.set(5,5,5);
-    sprite.scale.divideScalar(2.5);
+    sprite.position.set(item.xPos / 10, item.yPos/50, item.zPos /10);
+    //sprite.scale.set(2,2,2)
+    //sprite.scale.divideScalar(scaleRatio);
     sprite.className = "sprite";
     sprite.userData = {
     idx: item.figure_id,
@@ -1360,7 +1360,8 @@ function updateChartPos(chartPos) {
 
 
 
-const updatedChartPos = updateChartPos(chartPos);
+const updatedChartPos = chartPos;
+//const updatedChartPos = updateChartPos(chartPos);
 console.log(updatedChartPos);
 
 // Create a color scale using d3.scaleOrdinal
