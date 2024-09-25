@@ -18,8 +18,8 @@ export function makeChart(data,width){
       .velocityDecay(0.1) // low friction
       .force("x", d3.forceX().strength(0.01))
       .force("y", d3.forceY().strength(0.01))
-      .force("collide", d3.forceCollide().radius(d => d.r + 1).iterations(3))
-      .force("charge", d3.forceManyBody().strength((d, i) =>  10))
+      .force("collide", d3.forceCollide().radius(d => d.r + 10).iterations(3))
+      .force("charge", d3.forceManyBody().strength((d, i) =>  5))
       .on("tick", ticked);
 
   // d3.select(context.canvas)
@@ -47,7 +47,10 @@ export function makeChart(data,width){
       context.fillStyle = color(d.group);
       context.fill();
       context.fillStyle ="black";
-      context.fillText(d.group,d.x,d.y)
+      let group_text = d.group.replace(/_/g,"\r")
+      // measure the text and perform a centering offset
+      let widthText = context.measureText(group_text).width
+      context.fillText(group_text,d.x-widthText/2,d.y)
     }
     context.restore();
   }
