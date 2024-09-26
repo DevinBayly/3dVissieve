@@ -1,4 +1,5 @@
 import * as d3 from "npm:d3"
+import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 
 
 export function makeChart(data, width) {
@@ -16,7 +17,7 @@ export function makeChart(data, width) {
     circles.attr("cx", d => 0)
         .attr("cy", d => 0)
         .attr("r", d => d.r)
-        .attr("stroke", (d, i) => color(i))
+        .attr("fill",(d,i)=> color(i))
         .attr("fill-opacity", .1)
 
     group.attr("transform", `translate(${width / 2},${height / 2})`)
@@ -30,12 +31,12 @@ export function makeChart(data, width) {
     let words = [] 
     for (let node of nodes) {
         let ctype = node.group
-        // this helps us make sure to offset the word a bit in y within the circle later
+    //     // this helps us make sure to offset the word a bit in y within the circle later
         let num_word =0
-        // split the words by the _ in between them
-        let words = ctype.split(/_/g)
+    //     // split the words by the _ in between them
+        let chart_type_words = ctype.split(/_/g)
         let total_words = words.length
-        for (let word of words) {
+        for (let word of chart_type_words) {
             mapping[word_index] = {circle_index,num_word,total_words}
             // increment the word index so that overall the mapping is maintained
             word_index+=1
@@ -48,7 +49,16 @@ export function makeChart(data, width) {
     // establish a shift value for the text within a circle
     let shift_y = 10
     console.log(mapping)
-    let text = group.selectAll("text").data(words).join("text").attr("x", 0).attr("y", 0).text(d => d)
+    // font scale 
+    let radii = nodes.map(e=>e.r)
+    let radScale = d3.scaleLinear()
+    radScale.domain(d3.extent(radii))
+    radScale.range([9,36])
+    let text = group.selectAll("text").data(words).join("text").style("font-size",(d,i)=> {
+        let word_data = mapping[i]
+        let circle_data = nodes[word_data.circle_index]
+        return `${radScale(circle_data.r)}px`
+    }).attr("x", 0).attr("y", 0).text(d => d)
 
     // let textSpan = text.append("tspan").text(d=> d.group).attr("x",0).attr("y",0)
     // sanity check
@@ -82,19 +92,19 @@ export function makeChart(data, width) {
     function ticked() {
         circles.attr("cx", d => d.x).attr("cy", d => d.y)
         // in here we have to convert from the word index back to the circle index 
-        // text.attr("x", (d,word_index) => {
-        //     let word_data = mapping[word_index]
-        //     let circle_data = nodes[word_data.circle_index]
-        //     return circle_data.x
-        // }).attr("y", (d,word_index) => {
-        //     let word_data = mapping[word_index]
-        //     let circle_data = nodes[word_data.circle_index]
-        //     // control a bit for the number of words potentially extending out past the bottom of the circle , this is our attempt to center in the middle
-        //     // if we know how many words our little chart type is split into then we know that the shift_y will occur that many times
-        //     // so instead we need to move in the opposite direction half that total amoutn of shifting and we will be centered
-        //     let half_total_shift = word_data.total_words * shift_y/1.5
-        //     return circle_data.y + word_data.num_word*shift_y  - half_total_shift
-        // })
+        text.attr("x", (d,word_index) => {
+            let word_data = mapping[word_index]
+            let circle_data = nodes[word_data.circle_index]
+            return circle_data.x
+        }).attr("y", (d,word_index) => {
+            let word_data = mapping[word_index]
+            let circle_data = nodes[word_data.circle_index]
+            let font_scale = radScale(circle_data.r)
+            // control a bit for the number of words potentially extending out past the bottom of the circle , this is our attempt to center in the middle
+            // if we know how many words our little chart type is split into then we know that the shift_y will occur that many times
+            // so instead we need to move in the opposite direction half that total amoutn of shifting and we will be centered
+            return circle_data.y + word_data.num_word*font_scale 
+        })
     }
 
     return svg.node();

@@ -24,7 +24,7 @@ console.log(json_data)
 let radScale = d3.scaleLinear()
 // calculate the min adn max for just the num values
 radScale.domain(d3.extent(json_data.map(e=>e.num)))
-radScale.range([20,100])
+radScale.range([40,100])
 
 // now we will extent the json data to include the r values from the scale
 let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
