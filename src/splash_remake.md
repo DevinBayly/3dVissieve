@@ -1,7 +1,7 @@
 ---
 toc: false
 title: Splash Remake
-sql:sql:
+sql:
   publications: ./data/new_layout.db
 ---
 ```js
@@ -30,7 +30,7 @@ radScale.range([40,100])
 let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
 // make a observed variable that we can do things with later in the file
 // let chart_type= Generators.observe(notifyChartType)
-let chart = makeChart(chart_data,width)
+let chart = makeChart(chart_data,800)
 let chart_type = view(chart)
 ```
 
