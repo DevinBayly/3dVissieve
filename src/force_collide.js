@@ -1,24 +1,15 @@
 import * as d3 from "npm:d3"
 import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 
-const chartClickedCustomEvent = new Event("chart_cli")
-
-// define a function that's going to share out the values of the chart type when they get updated
-export function notifyChartType(notify) {
-    // some event that happens when the click has happened
-    const typeClicked = () => notify(chart_type)
-    document.body.addEventListener("chart_cli",typeClicked)
-    // no clue what this is included for, maybe the receiving generator does something with the detach listener
-    return ()=> document.body.removeEventListener("chart_cli",typeClicked)
-}
-
-var chart_type ="none selected"
 
 export function makeChart(data, width,reactive_variable,chart_type) {
     const height = width;
     const color = d3.scaleOrdinal(d3.schemeTableau10);
     // make a standard circles d3 chart
     let svg = d3.create("svg")
+    // using this to help with the view process
+    let htmlNode = svg.node()
+    htmlNode.value=0
     svg.attr("width", width)
     svg.attr("height", height)
     const nodes = data.map(Object.create);
@@ -40,8 +31,10 @@ export function makeChart(data, width,reactive_variable,chart_type) {
         chart_type = node.group
         console.log(d,selection,node,chart_type)
         // here's the point where we connect to a reactive variable that is watched by the application
-        document.body.dispatchEvent(chartClickedCustomEvent)
-        
+        htmlNode.value=chart_type
+        // construct the event type that the view in the other notebook can reach to
+        htmlNode.dispatchEvent(new Event("input", {bubbles: true}))
+
     }
     function hovered(d) {
       // change the selection style
@@ -53,6 +46,7 @@ export function makeChart(data, width,reactive_variable,chart_type) {
     }
     function unhovered(d) {
         d3.select(this).classed('circle-hover',false)
+
     }
     circles.on("click",clicked)
     circles.on("mouseover",hovered)
@@ -144,8 +138,8 @@ export function makeChart(data, width,reactive_variable,chart_type) {
             return circle_data.y + word_data.num_word * font_scale
         })
     }
-
-    return svg.node();
+    console.log("the html node",htmlNode)
+    return htmlNode;
 }
 export function makeForceCollide(width) {
     const k = width / 200;

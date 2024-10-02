@@ -5,7 +5,7 @@ sql:
   publications: ./data/new_layout.db
 ---
 ```js
-import {makeForceCollide,makeChart,notifyChartType} from "./force_collide.js"
+import {makeForceCollide,makeChart} from "./force_collide.js"
 ```
 
 
@@ -30,6 +30,8 @@ radScale.range([40,100])
 let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
 // make a observed variable that we can do things with later in the file
 // let chart_type= Generators.observe(notifyChartType)
+let chart = makeChart(chart_data,width)
+let chart_type = view(chart)
 ```
 
 <style>
@@ -42,9 +44,9 @@ let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
 
 ```html
 <div class="card">
-  ${makeChart(chart_data,width,chart_type)}
+  ${chart}
 </div>
-```
-```js
-chart_type
+<div class="card">
+ ${chart_type}
+<div>
 ```
