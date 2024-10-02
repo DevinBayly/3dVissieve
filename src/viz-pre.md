@@ -402,12 +402,9 @@ const chart_type = view(forceCollideChart)
 
 ```
 
-<div class="card">
-  ${chart}
-</div>
 
 
-<div  id="loading" class="fade-in">
+<div  id="loading" >
 <div class="loadingContent">
 <div class="contentTitle">Vis Sieve - 3D Exploration</div>
 <div class="contentInfo">Vis-sieve is a project that aims to analyze the use of visualizations in academia. Here is a 3D Space for you to navigate to explore the visualizations used in academia.</div>
@@ -429,18 +426,6 @@ const chart_type = view(forceCollideChart)
 
 
 
-<div class = "card" id="threeD">
-<button id='mapButton' class="button-55" class="fade-in" >Map</button>
-<button id='resetButton' class="button-55" class="fade-in" >Go Back</button>
-<div id="mapContainer" class="hidden">
-  <span id="closeButton" class="close-button">&#10005;</span>
-  <span id="map-title"> Which Chart Type You Like To Explore?</span>
-  <div class="full-content" id="full-map">
-  </div>
-</div>
-
-
-</div>
 
 
 

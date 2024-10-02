@@ -256,7 +256,7 @@ export async function loadDataAndInitialize(ctype) {
   }
 }
 // Call the function to execute the logic
-loadDataAndInitialize("line_plot");
+
 
 // modify based on the extact atlases drawn
 const atlases = [
