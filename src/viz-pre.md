@@ -399,33 +399,34 @@ let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
 let forceCollideChart = makeChart(chart_data,800)
 
 const chart_type = view(forceCollideChart)
+// load up zhiyang's code when the chart_type changes
+```
 
+```js
+loadDataAndInitialize(chart_type)
+chart_type
 ```
 
 
 
-<div  id="loading" >
-<div class="loadingContent">
-<div class="contentTitle">Vis Sieve - 3D Exploration</div>
-<div class="contentInfo">Vis-sieve is a project that aims to analyze the use of visualizations in academia. Here is a 3D Space for you to navigate to explore the visualizations used in academia.</div>
-<div class="contentInstruction">
-<div class="instructionDetails">
-  <ul>
-    <li><strong>Map Navigation:</strong> Click on each type of visualization to view that group of images.</li>
-    <li><strong>3D Space Interaction:</strong> Use the mouse to move around and scroll to zoom in/out.</li>
-    <li><strong>Viewing Details:</strong> Click on an interesting image to see more details.</li>
-    <li><strong>Image Navigation:</strong> After selecting an image, use the navigation space bar below to view the full image, see details, or access related papers. You can also use the arrow keys (◄ ►) to navigate.</li>
-  </ul>
-</div>
+
+
+<div class="card">
+  ${forceCollideChart}
 </div>
 
-<div class="enterButton"><button id="enter">Let's Go</button>
-</div>
-</div>
+<div class = "card" id="threeD">
+<button id='mapButton' class="button-55" class="fade-in" >Map</button>
+<button id='resetButton' class="button-55" class="fade-in" >Go Back</button>
+<div id="mapContainer" class="hidden">
+  <span id="closeButton" class="close-button">&#10005;</span>
+  <span id="map-title"> Which Chart Type You Like To Explore?</span>
+  <div class="full-content" id="full-map">
+  </div>
 </div>
 
 
-
+</div>
 
 
 
