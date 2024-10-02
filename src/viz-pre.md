@@ -397,7 +397,7 @@ let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
 
 let chart = makeChart(chart_data,width)
 
-const chart_type = view(chart)
+// const chart_type = view(chart)
 
 ```
 
@@ -765,7 +765,7 @@ const mapDom = document.getElementById("full-map");
     const atlas = atlases[atlasIndex];
     const atlasX = imageIndex % atlas.grid.x;
     const atlasY = Math.floor(imageIndex / atlas.grid.x);
-    const width = 1 / atlas.grid.x;
+    const spriteWidth = 1 / atlas.grid.x;
     const height = 1 / atlas.grid.y;
 
      const spriteMaterial = new THREE.SpriteMaterial({
@@ -773,8 +773,8 @@ const mapDom = document.getElementById("full-map");
       color: 0xffffff
     });
 
-    spriteMaterial.map.repeat.set(width, height);
-    spriteMaterial.map.offset.set(atlasX * width, 1 - (atlasY + 1) * height);
+    spriteMaterial.map.repeat.set(spriteWidth, height);
+    spriteMaterial.map.offset.set(atlasX * spriteWidth, 1 - (atlasY + 1) * height);
 
     const sprite = new THREE.Sprite(spriteMaterial);
     sprite.position.set(item.xPos / 10, item.yPos/50, item.zPos /10);
@@ -1336,206 +1336,6 @@ function moveCamera(target, lookAtPosition) {
     updateCameraPosition();
 }
 
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-
-
-
-// generate map functions
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-
-async function countMap(db) {
-    try {
-        // console.log("start");
-        const results = await db.query(`
-            SELECT 
-               figure_id,
-               int_value,
-               xPos,
-               yPos,
-               zPos,
-            FROM 
-                base.figure_property
-            ORDER BY 
-                figure_id;
-        `);
-
-        const resultsArray = results.toArray();
-        // console.log("end");
-        return resultsArray;
-    } catch (error) {
-        console.error("Error executing query:", error);
-        throw error;
-    }
-}
-// const map = await countMap(db);
-// function updateChartPos(chartPos) {
-//   // Keep only the first 42 items (indices 0 to 41)
-//   const filteredChartPos = chartPos.slice(0, 42);
-
-//   // Constants for the matrix dimensions
-//   const cols = 7;
-//   const rows = 6;
-
-//   // Update the z values for each row
-//   for (let row = 0; row < rows; row++) {
-//     const baseZ = filteredChartPos[row * cols].z;
-//     for (let col = 0; col < cols; col++) {
-//       const idx = row * cols + col;
-//       filteredChartPos[idx].z = baseZ;
-//     }
-//   }
-
-//   // Update the x values for each column
-//   for (let col = 0; col < cols; col++) {
-//     const baseX = filteredChartPos[col].x;
-//     for (let row = 0; row < rows; row++) {
-//       const idx = row * cols + col;
-//       filteredChartPos[idx].x = baseX;
-//     }
-//   }
-
-//   return filteredChartPos;
-// }
-
-
-
-// const updatedChartPos = chartPos;
-// //const updatedChartPos = updateChartPos(chartPos);
-// console.log(updatedChartPos);
-
-// Create a color scale using d3.scaleOrdinal
-const colorScale = d3.scaleOrdinal()
-    .domain(d3.range(0, 45)) // Assuming int_value ranges from 0 to 44
-    .range(colors);
-
-// function generateScatterPlot(data, w, h, parentDom) {
-//     // Check for any potential issues in data
-//     if (data.some(d => d.xPos === undefined || d.zPos === undefined || isNaN(d.int_value))) {
-//         console.error("Data contains undefined or NaN values", data);
-//         return;
-//     }
-//     // Plot configuration
-//     const plot = Plot.plot({
-//         width: w,
-//         height: h,
-//         marks: [
-          
-//             Plot.image(updatedChartPos, {
-//             x: d => -d.x,
-//             y: d => d.z,
-//             src: "https://github.com/JimmyXwtx/3dVis/blob/master/src/data/grey-box.png?raw=true",
-//             width: 150,
-//           }),
-//             Plot.dot(data, {
-//                 x: d => -d.xPos / 10,
-//                 y: d => d.zPos / 10,
-//                 fill: d => colorScale(d.int_value),
-//                 fillOpacity: 0,
-//                 r: 4,
-//                 // Add an attribute for int_value
-//                 title: d => `int_value: ${d.int_value}` // Tooltip, not for attribute
-//             }),
-//             Plot.text(updatedChartPos, {
-//                 x: d => -d.x,
-//                 y: d => d.z,
-//                 text: d => d.label,
-//                 textAnchor: "middle",
-//                 fontSize: "17px",
-//                 dy: -5,
-//                 fill: "black",
-  
-//             })
-//         ],
-//         x: { axis: null },
-//         y: { axis: null },
-//         facet: { axis: null },
-//         style: {
-//             border: "none"
-//         },
-//         id: "scatter-plot"
-//     });
-//     plot.style.position = "absolute";
-//     plot.style.scale = "93%";
-//     plot.style.top = "0%";
-//     parentDom.appendChild(plot);
-
-//     // Add custom attributes to the dots and text elements
-//     const svg = parentDom.querySelector('svg');
-//     if (svg) {
-//         // Add attributes to dots and set up event listeners
-//         svg.querySelectorAll('circle').forEach((circle, index) => {
-//             const intValue = data[index].int_value;
-//             circle.setAttribute('data-int-value', intValue);
-//             circle.addEventListener('click', (event) => {
-                
-//                 const index = Number(circle.getAttribute('data-int-value'));
-//                 if(index){
-//                 const targetGroup = getObjectByIdx(chartPos, index);
-//                 const targetPosition = create3DVector(targetGroup.x, 2, targetGroup.y);
-//                 const lookAtPosition = create3DVector(0, 0, 0);
-
-//                 // console.log('Clicked dot int_value:', targetPosition);
-//                 moveCamera(targetPosition, lookAtPosition);
-     
-//                 // const mapContainer = document.getElementById("mapContainer");
-//                 // const mapOpenButton = document.getElementById("mapButton");
-//                 // mapContainer.classList.add("hidden");
-//                 // mapContainer.classList.add("fade-out");
-//                 // mapContainer.classList.remove("fade-in");
-//                 // mapContainer.classList.add("disabled");
-//                 // mapOpenButton.style.display = 'flex';
-               
-//                 }
-             
-              
-//                 event.stopPropagation(); // Prevents the event from bubbling up
-//             });
-//         });
-
-//         // Add attributes to text elements and set up event listeners
-//         svg.querySelectorAll('text').forEach((text, index) => {
-//             const intValue = data[index].int_value;
-//             text.setAttribute('data-int-value', intValue);
-//             text.addEventListener('click', (event) => {
-//                 // console.log('Clicked text int_value:', text.getAttribute('data-int-value'));
-//                 const index = Number(text.getAttribute('data-int-value'));
-//                 if(index){
-//                 const targetGroup = getObjectByIdx(chartPos, index);
-//                 const targetPosition = create3DVector(targetGroup.x, 2, targetGroup.y);
-//                 const lookAtPosition = create3DVector(0, 0, 0);
-
-//                 // console.log('Clicked dot int_value:', targetPosition);
-//                 moveCamera(targetPosition, lookAtPosition);
-     
-//                 // const mapContainer = document.getElementById("mapContainer");
-//                 // const mapOpenButton = document.getElementById("mapButton");
-//                 // mapContainer.classList.add("hidden");
-//                 // mapContainer.classList.add("fade-out");
-//                 // mapContainer.classList.remove("fade-in");
-//                 // mapContainer.classList.add("disabled");
-//                 // mapOpenButton.style.display = 'flex';
-               
-//                 }
-             
-//                 event.stopPropagation(); // Prevents the event from bubbling up
-
-                
-//             });
-//         });
-//     }
-// }
-
-
-
-
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-// generate map functions
 
 
 
