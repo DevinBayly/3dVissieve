@@ -9,7 +9,7 @@ export function makeChart(data, width,reactive_variable,chart_type) {
     let svg = d3.create("svg")
     // using this to help with the view process
     let htmlNode = svg.node()
-    htmlNode.value=0
+    htmlNode.value="line_chart"
     svg.attr("width", width)
     svg.attr("height", height)
     const nodes = data.map(Object.create);

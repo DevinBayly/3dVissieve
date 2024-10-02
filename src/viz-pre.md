@@ -1,6 +1,8 @@
 ---
 toc: false
 title: Explore Visualizations in 3D
+sql:
+  publications: ./data/new_layout.db
 ---
 
 
@@ -356,6 +358,49 @@ title: Explore Visualizations in 3D
 <!-- https://observablehq.com/framework/lib/duckdb -->
 <!-- duckdb with ob reference -->
 
+<style>
+.circle-hover {
+  fill-opacity:1;
+}
+</style>
+
+```js
+// setting up the splash view, 
+
+import {makeForceCollide,makeChart} from "./force_collide.js"
+```
+
+
+
+
+```sql id=type_counts
+SELECT string_value as 'group',COUNT(*) as 'num' FROM publications.figure_property GROUP BY string_value;
+```
+
+```js
+// right now type_counts is a apache arrow and can be converted into a workable d3 format with 
+let json_data = type_counts.toArray().map(e=> e.toJSON())
+console.log(json_data)
+
+// next we want to make the format look liek the makeChart function expects 
+// this means that we need to exchange the num for a variable r 
+// we will use a linear scale in d3 to map the extent of the counts to a range of radii values
+let radScale = d3.scaleLinear()
+// calculate the min adn max for just the num values
+radScale.domain(d3.extent(json_data.map(e=>e.num)))
+radScale.range([40,100])
+
+// now we will extent the json data to include the r values from the scale
+let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
+// make a observed variable that we can do things with later in the file
+// let chart_type= Generators.observe(notifyChartType)
+
+let chart = makeChart(chart_data,width)
+
+const chart_type = view(chart)
+
+```
+
 ```js
 // Declare labels
 
@@ -418,9 +463,7 @@ import * as duckdb from "npm:@duckdb/duckdb-wasm";
 const db = await DuckDBClient.of({base: FileAttachment("/data/new_layout.db")});
 // import data
 
-// data extraction by the defined data function 
-const publicationDB = await initialDB(db)
-const chartPos = await countChartPos(db);
+// const chartPos = await countChartPos(db);
 
 const topicsArray = await countTopics(db);
 
@@ -467,7 +510,7 @@ async function initialDB(db) {
             LEFT JOIN 
                 base.paper p ON f.paper_id = p.id
             LEFT JOIN 
-                base.figure_property fp ON f.id = fp.figure_id
+                base.figure_property fp ON f.id = fp.figure_id AND fp.string_value ='line_chart'
             ORDER BY 
                 f.id;
         `);
@@ -702,7 +745,7 @@ const mapContainer = document.getElementById("mapContainer");
 mapContainer.style.width = `${canvasWidth}px`;
 mapContainer.style.height =`${canvasHeight}px`;
 const mapDom = document.getElementById("full-map");
-generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
+// generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
 
 
     imagePositions.forEach(item => {
@@ -1328,163 +1371,163 @@ async function countMap(db) {
         throw error;
     }
 }
-const map = await countMap(db);
-function updateChartPos(chartPos) {
-  // Keep only the first 42 items (indices 0 to 41)
-  const filteredChartPos = chartPos.slice(0, 42);
+// const map = await countMap(db);
+// function updateChartPos(chartPos) {
+//   // Keep only the first 42 items (indices 0 to 41)
+//   const filteredChartPos = chartPos.slice(0, 42);
 
-  // Constants for the matrix dimensions
-  const cols = 7;
-  const rows = 6;
+//   // Constants for the matrix dimensions
+//   const cols = 7;
+//   const rows = 6;
 
-  // Update the z values for each row
-  for (let row = 0; row < rows; row++) {
-    const baseZ = filteredChartPos[row * cols].z;
-    for (let col = 0; col < cols; col++) {
-      const idx = row * cols + col;
-      filteredChartPos[idx].z = baseZ;
-    }
-  }
+//   // Update the z values for each row
+//   for (let row = 0; row < rows; row++) {
+//     const baseZ = filteredChartPos[row * cols].z;
+//     for (let col = 0; col < cols; col++) {
+//       const idx = row * cols + col;
+//       filteredChartPos[idx].z = baseZ;
+//     }
+//   }
 
-  // Update the x values for each column
-  for (let col = 0; col < cols; col++) {
-    const baseX = filteredChartPos[col].x;
-    for (let row = 0; row < rows; row++) {
-      const idx = row * cols + col;
-      filteredChartPos[idx].x = baseX;
-    }
-  }
+//   // Update the x values for each column
+//   for (let col = 0; col < cols; col++) {
+//     const baseX = filteredChartPos[col].x;
+//     for (let row = 0; row < rows; row++) {
+//       const idx = row * cols + col;
+//       filteredChartPos[idx].x = baseX;
+//     }
+//   }
 
-  return filteredChartPos;
-}
+//   return filteredChartPos;
+// }
 
 
 
-const updatedChartPos = chartPos;
-//const updatedChartPos = updateChartPos(chartPos);
-console.log(updatedChartPos);
+// const updatedChartPos = chartPos;
+// //const updatedChartPos = updateChartPos(chartPos);
+// console.log(updatedChartPos);
 
 // Create a color scale using d3.scaleOrdinal
 const colorScale = d3.scaleOrdinal()
     .domain(d3.range(0, 45)) // Assuming int_value ranges from 0 to 44
     .range(colors);
 
-function generateScatterPlot(data, w, h, parentDom) {
-    // Check for any potential issues in data
-    if (data.some(d => d.xPos === undefined || d.zPos === undefined || isNaN(d.int_value))) {
-        console.error("Data contains undefined or NaN values", data);
-        return;
-    }
-    // Plot configuration
-    const plot = Plot.plot({
-        width: w,
-        height: h,
-        marks: [
+// function generateScatterPlot(data, w, h, parentDom) {
+//     // Check for any potential issues in data
+//     if (data.some(d => d.xPos === undefined || d.zPos === undefined || isNaN(d.int_value))) {
+//         console.error("Data contains undefined or NaN values", data);
+//         return;
+//     }
+//     // Plot configuration
+//     const plot = Plot.plot({
+//         width: w,
+//         height: h,
+//         marks: [
           
-            Plot.image(updatedChartPos, {
-            x: d => -d.x,
-            y: d => d.z,
-            src: "https://github.com/JimmyXwtx/3dVis/blob/master/src/data/grey-box.png?raw=true",
-            width: 150,
-          }),
-            Plot.dot(data, {
-                x: d => -d.xPos / 10,
-                y: d => d.zPos / 10,
-                fill: d => colorScale(d.int_value),
-                fillOpacity: 0,
-                r: 4,
-                // Add an attribute for int_value
-                title: d => `int_value: ${d.int_value}` // Tooltip, not for attribute
-            }),
-            Plot.text(updatedChartPos, {
-                x: d => -d.x,
-                y: d => d.z,
-                text: d => d.label,
-                textAnchor: "middle",
-                fontSize: "17px",
-                dy: -5,
-                fill: "black",
+//             Plot.image(updatedChartPos, {
+//             x: d => -d.x,
+//             y: d => d.z,
+//             src: "https://github.com/JimmyXwtx/3dVis/blob/master/src/data/grey-box.png?raw=true",
+//             width: 150,
+//           }),
+//             Plot.dot(data, {
+//                 x: d => -d.xPos / 10,
+//                 y: d => d.zPos / 10,
+//                 fill: d => colorScale(d.int_value),
+//                 fillOpacity: 0,
+//                 r: 4,
+//                 // Add an attribute for int_value
+//                 title: d => `int_value: ${d.int_value}` // Tooltip, not for attribute
+//             }),
+//             Plot.text(updatedChartPos, {
+//                 x: d => -d.x,
+//                 y: d => d.z,
+//                 text: d => d.label,
+//                 textAnchor: "middle",
+//                 fontSize: "17px",
+//                 dy: -5,
+//                 fill: "black",
   
-            })
-        ],
-        x: { axis: null },
-        y: { axis: null },
-        facet: { axis: null },
-        style: {
-            border: "none"
-        },
-        id: "scatter-plot"
-    });
-    plot.style.position = "absolute";
-    plot.style.scale = "93%";
-    plot.style.top = "0%";
-    parentDom.appendChild(plot);
+//             })
+//         ],
+//         x: { axis: null },
+//         y: { axis: null },
+//         facet: { axis: null },
+//         style: {
+//             border: "none"
+//         },
+//         id: "scatter-plot"
+//     });
+//     plot.style.position = "absolute";
+//     plot.style.scale = "93%";
+//     plot.style.top = "0%";
+//     parentDom.appendChild(plot);
 
-    // Add custom attributes to the dots and text elements
-    const svg = parentDom.querySelector('svg');
-    if (svg) {
-        // Add attributes to dots and set up event listeners
-        svg.querySelectorAll('circle').forEach((circle, index) => {
-            const intValue = data[index].int_value;
-            circle.setAttribute('data-int-value', intValue);
-            circle.addEventListener('click', (event) => {
+//     // Add custom attributes to the dots and text elements
+//     const svg = parentDom.querySelector('svg');
+//     if (svg) {
+//         // Add attributes to dots and set up event listeners
+//         svg.querySelectorAll('circle').forEach((circle, index) => {
+//             const intValue = data[index].int_value;
+//             circle.setAttribute('data-int-value', intValue);
+//             circle.addEventListener('click', (event) => {
                 
-                const index = Number(circle.getAttribute('data-int-value'));
-                if(index){
-                const targetGroup = getObjectByIdx(chartPos, index);
-                const targetPosition = create3DVector(targetGroup.x, 2, targetGroup.y);
-                const lookAtPosition = create3DVector(0, 0, 0);
+//                 const index = Number(circle.getAttribute('data-int-value'));
+//                 if(index){
+//                 const targetGroup = getObjectByIdx(chartPos, index);
+//                 const targetPosition = create3DVector(targetGroup.x, 2, targetGroup.y);
+//                 const lookAtPosition = create3DVector(0, 0, 0);
 
-                // console.log('Clicked dot int_value:', targetPosition);
-                moveCamera(targetPosition, lookAtPosition);
+//                 // console.log('Clicked dot int_value:', targetPosition);
+//                 moveCamera(targetPosition, lookAtPosition);
      
-                // const mapContainer = document.getElementById("mapContainer");
-                // const mapOpenButton = document.getElementById("mapButton");
-                // mapContainer.classList.add("hidden");
-                // mapContainer.classList.add("fade-out");
-                // mapContainer.classList.remove("fade-in");
-                // mapContainer.classList.add("disabled");
-                // mapOpenButton.style.display = 'flex';
+//                 // const mapContainer = document.getElementById("mapContainer");
+//                 // const mapOpenButton = document.getElementById("mapButton");
+//                 // mapContainer.classList.add("hidden");
+//                 // mapContainer.classList.add("fade-out");
+//                 // mapContainer.classList.remove("fade-in");
+//                 // mapContainer.classList.add("disabled");
+//                 // mapOpenButton.style.display = 'flex';
                
-                }
+//                 }
              
               
-                event.stopPropagation(); // Prevents the event from bubbling up
-            });
-        });
+//                 event.stopPropagation(); // Prevents the event from bubbling up
+//             });
+//         });
 
-        // Add attributes to text elements and set up event listeners
-        svg.querySelectorAll('text').forEach((text, index) => {
-            const intValue = data[index].int_value;
-            text.setAttribute('data-int-value', intValue);
-            text.addEventListener('click', (event) => {
-                // console.log('Clicked text int_value:', text.getAttribute('data-int-value'));
-                const index = Number(text.getAttribute('data-int-value'));
-                if(index){
-                const targetGroup = getObjectByIdx(chartPos, index);
-                const targetPosition = create3DVector(targetGroup.x, 2, targetGroup.y);
-                const lookAtPosition = create3DVector(0, 0, 0);
+//         // Add attributes to text elements and set up event listeners
+//         svg.querySelectorAll('text').forEach((text, index) => {
+//             const intValue = data[index].int_value;
+//             text.setAttribute('data-int-value', intValue);
+//             text.addEventListener('click', (event) => {
+//                 // console.log('Clicked text int_value:', text.getAttribute('data-int-value'));
+//                 const index = Number(text.getAttribute('data-int-value'));
+//                 if(index){
+//                 const targetGroup = getObjectByIdx(chartPos, index);
+//                 const targetPosition = create3DVector(targetGroup.x, 2, targetGroup.y);
+//                 const lookAtPosition = create3DVector(0, 0, 0);
 
-                // console.log('Clicked dot int_value:', targetPosition);
-                moveCamera(targetPosition, lookAtPosition);
+//                 // console.log('Clicked dot int_value:', targetPosition);
+//                 moveCamera(targetPosition, lookAtPosition);
      
-                // const mapContainer = document.getElementById("mapContainer");
-                // const mapOpenButton = document.getElementById("mapButton");
-                // mapContainer.classList.add("hidden");
-                // mapContainer.classList.add("fade-out");
-                // mapContainer.classList.remove("fade-in");
-                // mapContainer.classList.add("disabled");
-                // mapOpenButton.style.display = 'flex';
+//                 // const mapContainer = document.getElementById("mapContainer");
+//                 // const mapOpenButton = document.getElementById("mapButton");
+//                 // mapContainer.classList.add("hidden");
+//                 // mapContainer.classList.add("fade-out");
+//                 // mapContainer.classList.remove("fade-in");
+//                 // mapContainer.classList.add("disabled");
+//                 // mapOpenButton.style.display = 'flex';
                
-                }
+//                 }
              
-                event.stopPropagation(); // Prevents the event from bubbling up
+//                 event.stopPropagation(); // Prevents the event from bubbling up
 
                 
-            });
-        });
-    }
-}
+//             });
+//         });
+//     }
+// }
 
 
 
@@ -1497,6 +1540,11 @@ function generateScatterPlot(data, w, h, parentDom) {
 
 
 ```
+<div class="card">
+  ${chart}
+</div>
+
+
 <div  id="loading" class="fade-in">
 <div class="loadingContent">
 <div class="contentTitle">Vis Sieve - 3D Exploration</div>

@@ -1,7 +1,7 @@
 ---
 toc: false
 title: Splash Remake
-sql:
+sql:sql:
   publications: ./data/new_layout.db
 ---
 ```js
