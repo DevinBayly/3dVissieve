@@ -1,8 +1,20 @@
 import * as d3 from "npm:d3"
 import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 
+const chartClickedCustomEvent = new Event("chart_cli")
 
-export function makeChart(data, width) {
+// define a function that's going to share out the values of the chart type when they get updated
+export function notifyChartType(notify) {
+    // some event that happens when the click has happened
+    const typeClicked = () => notify(chart_type)
+    document.body.addEventListener("chart_cli",typeClicked)
+    // no clue what this is included for, maybe the receiving generator does something with the detach listener
+    return ()=> document.body.removeEventListener("chart_cli",typeClicked)
+}
+
+var chart_type ="none selected"
+
+export function makeChart(data, width,reactive_variable,chart_type) {
     const height = width;
     const color = d3.scaleOrdinal(d3.schemeTableau10);
     // make a standard circles d3 chart
@@ -17,44 +29,70 @@ export function makeChart(data, width) {
     circles.attr("cx", d => 0)
         .attr("cy", d => 0)
         .attr("r", d => d.r)
-        .attr("fill",(d,i)=> color(i))
+        .attr("fill", (d, i) => color(i))
         .attr("fill-opacity", .1)
+    //  set up the callbacks for the circle that make the particular attribute come up taht we can use to filter the plots
+    function clicked(event, d) {
+        if (event.defaultPrevented) return; // dragged
+
+        let selection = d3.select(this)
+        let node = nodes[d.index]
+        chart_type = node.group
+        console.log(d,selection,node,chart_type)
+        // here's the point where we connect to a reactive variable that is watched by the application
+        document.body.dispatchEvent(chartClickedCustomEvent)
+        
+    }
+    function hovered(d) {
+      // change the selection style
+      d3.select(this)
+        .classed('circle-hover',true)
+
+        
+      
+    }
+    function unhovered(d) {
+        d3.select(this).classed('circle-hover',false)
+    }
+    circles.on("click",clicked)
+    circles.on("mouseover",hovered)
+    circles.on("mouseout",unhovered)
 
     group.attr("transform", `translate(${width / 2},${height / 2})`)
     // the goal is to split the text on the _ and have the separate lines be included together but on different lines
     // make a mapping between the words and the circle i's index values so that we can get their x,y positions later
-    let chart_names= nodes.map(e=> e.group)
+    let chart_names = nodes.map(e => e.group)
 
     let mapping = {}
-    let word_index  =0
+    let word_index = 0
     let circle_index = 0
-    let words = [] 
+    let words = []
     for (let node of nodes) {
         let ctype = node.group
-    //     // this helps us make sure to offset the word a bit in y within the circle later
-        let num_word =0
-    //     // split the words by the _ in between them
+        //     // this helps us make sure to offset the word a bit in y within the circle later
+        let num_word = 0
+        //     // split the words by the _ in between them
         let chart_type_words = ctype.split(/_/g)
         let total_words = words.length
         for (let word of chart_type_words) {
-            mapping[word_index] = {circle_index,num_word,total_words}
+            mapping[word_index] = { circle_index, num_word, total_words }
             // increment the word index so that overall the mapping is maintained
-            word_index+=1
+            word_index += 1
             // if we have tree_plot then num_word would take on the two values 0,1 which we can use in the tick loop to shift by y
-            num_word+=1
+            num_word += 1
             words.push(word)
         }
-        circle_index+=1
+        circle_index += 1
     }
     // establish a shift value for the text within a circle
     let shift_y = 10
     console.log(mapping)
     // font scale 
-    let radii = nodes.map(e=>e.r)
+    let radii = nodes.map(e => e.r)
     let radScale = d3.scaleLinear()
     radScale.domain(d3.extent(radii))
-    radScale.range([9,36])
-    let text = group.selectAll("text").data(words).join("text").style("font-size",(d,i)=> {
+    radScale.range([9, 36])
+    let text = group.selectAll("text").data(words).join("text").style("font-size", (d, i) => {
         let word_data = mapping[i]
         let circle_data = nodes[word_data.circle_index]
         return `${radScale(circle_data.r)}px`
@@ -92,18 +130,18 @@ export function makeChart(data, width) {
     function ticked() {
         circles.attr("cx", d => d.x).attr("cy", d => d.y)
         // in here we have to convert from the word index back to the circle index 
-        text.attr("x", (d,word_index) => {
+        text.attr("x", (d, word_index) => {
             let word_data = mapping[word_index]
             let circle_data = nodes[word_data.circle_index]
             return circle_data.x
-        }).attr("y", (d,word_index) => {
+        }).attr("y", (d, word_index) => {
             let word_data = mapping[word_index]
             let circle_data = nodes[word_data.circle_index]
             let font_scale = radScale(circle_data.r)
             // control a bit for the number of words potentially extending out past the bottom of the circle , this is our attempt to center in the middle
             // if we know how many words our little chart type is split into then we know that the shift_y will occur that many times
             // so instead we need to move in the opposite direction half that total amoutn of shifting and we will be centered
-            return circle_data.y + word_data.num_word*font_scale 
+            return circle_data.y + word_data.num_word * font_scale
         })
     }
 

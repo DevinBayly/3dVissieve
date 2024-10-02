@@ -484,39 +484,39 @@ async function initialDB(db) {
 }
 
 
-async function countChartPos(db) {
-    try {
-        const results = await db.query(`
-            SELECT 
-                int_value, 
-                AVG(figure_property.xPos) AS xPos, 
-                AVG(figure_property.yPos) AS yPos, 
-                AVG(figure_property.zPos) AS zPos, 
-                COUNT(*) AS count 
-            FROM 
-                base.figure_property 
-            GROUP BY 
-                int_value
-            ORDER BY 
-                int_value;
-        `);
-
-        const resultsArray = results.toArray();
-        const output = resultsArray.map(row => ({
-            idx: row.int_value,
-            x: row.xPos,
-            y: row.yPos,
-            z: row.zPos,
-            count: row.count,
-            label: visualizationTypes[row.int_value]
-        }));
-        
-        return output;
-    } catch (error) {
-        console.error("Error executing query:", error);
-        throw error;
-    }
-}
+// async function countChartPos(db) {
+    // try {
+        // const results = await db.query(`
+            // SELECT 
+                // int_value, 
+                // AVG(figure_property.xPos) AS xPos, 
+                // AVG(figure_property.yPos) AS yPos, 
+                // AVG(figure_property.zPos) AS zPos, 
+                // COUNT(*) AS count 
+            // FROM 
+                // base.figure_property 
+            // GROUP BY 
+                // int_value
+            // ORDER BY 
+                // int_value;
+        // `);
+// 
+        // const resultsArray = results.toArray();
+        // const output = resultsArray.map(row => ({
+            // idx: row.int_value,
+            // x: row.xPos,
+            // y: row.yPos,
+            // z: row.zPos,
+            // count: row.count,
+            // label: visualizationTypes[row.int_value]
+        // }));
+        // 
+        // return output;
+    // } catch (error) {
+        // console.error("Error executing query:", error);
+        // throw error;
+    // }
+// }
 
 // count avg position
 
