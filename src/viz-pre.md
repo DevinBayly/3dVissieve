@@ -761,8 +761,8 @@ generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
     renderer.domElement.classList.remove("hidden");
     renderer.domElement.classList.add("visible");
     loadingDiv.style.pointerEvents = 'none';
-    mapContainer.classList.remove("hidden");
-    mapContainer.classList.add("fade-in");
+    // mapContainer.classList.remove("hidden");
+    // mapContainer.classList.add("fade-in");
 
   });
   
@@ -770,10 +770,10 @@ generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
   const mapCloseButton = document.getElementById("closeButton");
     mapCloseButton.addEventListener("click", function() {
     //  console.log("clicked");
-    mapContainer.classList.add("hidden");
-    mapContainer.classList.add("fade-out");
-    mapContainer.classList.remove("fade-in");
-    mapContainer.classList.add("disabled");
+    // mapContainer.classList.add("hidden");
+    // mapContainer.classList.add("fade-out");
+    // mapContainer.classList.remove("fade-in");
+    // mapContainer.classList.add("disabled");
     mapOpenButton.style.display = 'flex';
 
     });
@@ -781,10 +781,10 @@ generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
   mapOpenButton.addEventListener("click", function() {
     //  console.log("clicked");
      unSelectSprite();
-    mapContainer.classList.remove("hidden");
-    mapContainer.classList.remove("fade-out");
-    mapContainer.classList.add("fade-in");
-    mapContainer.classList.remove("disabled");
+    // mapContainer.classList.remove("hidden");
+    // mapContainer.classList.remove("fade-out");
+    // mapContainer.classList.add("fade-in");
+    // mapContainer.classList.remove("disabled");
     mapOpenButton.style.display = 'none';
 
     });
@@ -1438,13 +1438,13 @@ function generateScatterPlot(data, w, h, parentDom) {
                 // console.log('Clicked dot int_value:', targetPosition);
                 moveCamera(targetPosition, lookAtPosition);
      
-                const mapContainer = document.getElementById("mapContainer");
-                const mapOpenButton = document.getElementById("mapButton");
-                mapContainer.classList.add("hidden");
-                mapContainer.classList.add("fade-out");
-                mapContainer.classList.remove("fade-in");
-                mapContainer.classList.add("disabled");
-                mapOpenButton.style.display = 'flex';
+                // const mapContainer = document.getElementById("mapContainer");
+                // const mapOpenButton = document.getElementById("mapButton");
+                // mapContainer.classList.add("hidden");
+                // mapContainer.classList.add("fade-out");
+                // mapContainer.classList.remove("fade-in");
+                // mapContainer.classList.add("disabled");
+                // mapOpenButton.style.display = 'flex';
                
                 }
              
@@ -1468,13 +1468,13 @@ function generateScatterPlot(data, w, h, parentDom) {
                 // console.log('Clicked dot int_value:', targetPosition);
                 moveCamera(targetPosition, lookAtPosition);
      
-                const mapContainer = document.getElementById("mapContainer");
-                const mapOpenButton = document.getElementById("mapButton");
-                mapContainer.classList.add("hidden");
-                mapContainer.classList.add("fade-out");
-                mapContainer.classList.remove("fade-in");
-                mapContainer.classList.add("disabled");
-                mapOpenButton.style.display = 'flex';
+                // const mapContainer = document.getElementById("mapContainer");
+                // const mapOpenButton = document.getElementById("mapButton");
+                // mapContainer.classList.add("hidden");
+                // mapContainer.classList.add("fade-out");
+                // mapContainer.classList.remove("fade-in");
+                // mapContainer.classList.add("disabled");
+                // mapOpenButton.style.display = 'flex';
                
                 }
              
