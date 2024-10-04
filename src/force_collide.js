@@ -80,12 +80,14 @@ export function makeChart(data, width,widthFraction) {
         let chart_type_words = ctype.split(/_/g)
         let total_words = words.length
         for (let word of chart_type_words) {
-            mapping[word_index] = { circle_index, num_word, total_words }
+            let mapping_elements = { circle_index, num_word, total_words }
+            mapping[word_index] = mapping_elements
             // increment the word index so that overall the mapping is maintained
             word_index += 1
             // if we have tree_plot then num_word would take on the two values 0,1 which we can use in the tick loop to shift by y
             num_word += 1
-            words.push(word)
+            // also store information in the words that help map back to the circles
+            words.push({...mapping_elements,word})
         }
         circle_index += 1
     }
@@ -97,11 +99,42 @@ export function makeChart(data, width,widthFraction) {
     let fontScale = d3.scaleLinear()
     fontScale.domain(d3.extent(radii))
     fontScale.range([9, 36])
+    // TODO setup so that the text actually comes from the bound words data not the mapping object
     let text = group.selectAll("text").data(words).join("text").style("font-size", (d, i) => {
         let word_data = mapping[i]
         let circle_data = nodes[word_data.circle_index]
         return `${fontScale(circle_data.r)}px`
-    }).attr("x", 0).attr("y", 0).text(d => d)
+    }).attr("x", 0).attr("y", 0).text(d => d.word)
+    // setup events to trigger on the text also and identify which circle they're associated with
+
+    function textClick(event,d)  {
+        // find the circle index that we are interested in and trigger that click
+        // not super efficient, apparently still iterates over the nodes
+        let circle = d3.select(circles.nodes()[d.circle_index])
+        let node = nodes[d.circle_index]
+        console.log("text's circle is",circle,node.group)
+        circle.dispatch("click")
+
+    }
+    text.on("click",textClick)
+    function textHovered(event,d) {
+        // find the circle index that we are interested in and trigger that click
+        // not super efficient, apparently still iterates over the nodes
+        let circle = d3.select(circles.nodes()[d.circle_index])
+        let node = nodes[d.circle_index]
+        // circle.dispatch("mouseover")
+        console.log(circle.node())
+        circle.classed("circle-hover",true)
+    }
+    text.on("mouseover",textHovered)
+    function textUnhovered(event,d) {
+        let circle = d3.select(circles.nodes()[d.circle_index])
+        let node = nodes[d.circle_index]
+        // circle.dispatch("mouseover")
+        console.log(circle.node())
+        circle.classed("circle-hover",false)
+    }
+    text.on("mouseout",textUnhovered) 
 
     // let textSpan = text.append("tspan").text(d=> d.group).attr("x",0).attr("y",0)
     // sanity check
