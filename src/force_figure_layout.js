@@ -2,7 +2,7 @@ import * as d3 from "npm:d3"
 
 // receive the data, and for the moment just make a node for each one of the elements
 export function layoutData(data) {
-    const nodes = data.toArray().slice(0,5000).map(e=> Object.create(e.toJSON()));
+    const nodes = data.toArray().slice(0,50).map(e=> Object.create(e.toJSON()));
     // in this case we will wait to kick off the rendering of all the other data until the graph is done laying things out
     // consider making promise here that we can return who's value is changed in notify complete or in a single anonymosue function below
     const simulation = d3.forceSimulation(nodes)

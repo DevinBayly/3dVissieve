@@ -74,21 +74,22 @@ SELECT COUNT(*) FROM publications.figure_property fp WHERE fp.string_value = ${c
 import * as THREE from 'npm:three';
 import { CSS2DRenderer,CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-function makeBox(width) {
+function makeBox(width,data) {
 const height = width
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75,width/height,.1,5000)
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(width,height)
 const div = document.querySelector(".threed")
-renderer.domElement
+const controls = new OrbitControls(camera,renderer.domElement)
+controls.update()
 
 // make a geo
 const geometry = new THREE.BoxGeometry(1,1,1)
 const material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),Math.random(),Math.random())})
 const cube = new THREE.Mesh(geometry,material)
 // scene.add(cube)
-camera.position.z =1400
+camera.position.z =80
 console.log("made box")
 
 const plane = new THREE.PlaneGeometry(1,1)
@@ -98,20 +99,16 @@ geobuf.index = plane.index
 geobuf.attributes = plane.attributes
 
 
-const positions = new Float32Array(selectedFigures.numRows*3)
+const positions = new Float32Array(data.length*3)
 
 
 
-for ( let i = 0,i3 =0; i < selectedFigures.numRows; i++,i3+=3 ) {
+for ( let i = 0; i < data.length; i++) {
 
-  // positions
-
-  const x = Math.random() *2-1;
-  const y = Math.random() *2-1;
-  const z = Math.random() *2-1;
-  positions[i3+0] = x
-  positions[i3+1] = y
-  positions[i3+2] = z
+  let d = data[i]
+  positions[i*3+0] = d.x
+  positions[i*3+1] = 0
+  positions[i*3+2] = d.y
 
 }
 
@@ -174,7 +171,7 @@ const instmat = new THREE.RawShaderMaterial({
   
 })
 const instmesh = new THREE.Mesh(geobuf,instmat)
-instmesh.scale.set(500,500,500)
+// instmesh.scale.set(500,500,500)
 scene.add(instmesh)
 
 
@@ -183,11 +180,12 @@ function animate() {
   const time = performance.now() *.0005
   instmat.uniforms["time"].value = time
 
-			instmesh.rotation.x = time * 0.2;
-			instmesh.rotation.y = time * 0.4;
+			// instmesh.rotation.x = time * 0.2;
+			// instmesh.rotation.y = time * 0.4;
   renderer.render(scene,camera)
 }
 renderer.setAnimationLoop(animate)
+  controls.update()
   return renderer.domElement
 }
 // make a function that receives the data that's selected from the bubble layout, and runs the layout system, providing the make box function as a callback
@@ -197,12 +195,12 @@ renderer.setAnimationLoop(animate)
 
 // this cell is responsible for generating the laid out data when it's done being force graphed, and the makeBox function is going to depend on the result
 import {layoutData} from "./force_figure_layout.js"
-const laidOutData = layoutData(selectedFigures)
+const laidoutData = layoutData(selectedFigures)
 ```
 
 
 ```js
-laidOutData
+laidoutData
 ```
 
 
@@ -214,7 +212,7 @@ laidOutData
   makeChart(chart_data,width,4)
   )
 }</div>
-  <div class="card">${resize(width=> makeBox(width,chart_type))}</div>
+  <div class="card">${resize(width=> makeBox(width,laidoutData))}</div>
 </div>
 
 
