@@ -186,7 +186,33 @@ function animate() {
 renderer.setAnimationLoop(animate)
   return renderer.domElement
 }
+// make a function that receives the data that's selected from the bubble layout, and runs the layout system, providing the make box function as a callback
 ```
+
+
+```js
+const testh1 = html`<h1>test</h1>`
+console.log(testh1)
+testh1.onclick=()=>console.log("test click")
+const fast = new Promise((resolve)=> setTimeout(()=> resolve("slow"),5000))
+const clicked = new Promise(res => {
+  testh1.onclick =()=> res(Math.random())
+})
+```
+
+```js
+testh1
+```
+
+```js
+fast
+```
+
+```js
+clicked
+```
+
+
 <div class="grid grid-cols-2">
   <div class="card">${
   resize((width)=> 
