@@ -36,6 +36,33 @@ let chart_type = view(giveSvgViewReference())
 }
 </style>
 
+```sql id=selectedFigures display
+SELECT f.id AS figure_id, 
+                p.id AS paper_id, 
+                p.title, 
+                p.doi, 
+                p.publication_date, 
+                p.oa_url, 
+                p.pdf_path, 
+                p.inst_id, 
+                p.primary_topic_id,
+                f.local_path, 
+                f.server_path, 
+                fp.name, 
+                fp.int_value AS ChartType,  
+                fp.string_value AS Something, 
+                fp.xPos, 
+                fp.yPos, 
+                fp.zPos
+            FROM 
+                publications.figure f
+            LEFT JOIN 
+                publications.paper p ON f.paper_id = p.id
+            LEFT JOIN 
+                publications.figure_property fp ON f.id = fp.figure_id AND fp.string_value =${chart_type} AND fp.string_value IS NOT NULL
+            ORDER BY 
+                f.id;
+```
 
 
 ```js
