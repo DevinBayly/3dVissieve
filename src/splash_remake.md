@@ -189,28 +189,14 @@ renderer.setAnimationLoop(animate)
 // make a function that receives the data that's selected from the bubble layout, and runs the layout system, providing the make box function as a callback
 ```
 
-
 ```js
-const testh1 = html`<h1>test</h1>`
-console.log(testh1)
-testh1.onclick=()=>console.log("test click")
-const fast = new Promise((resolve)=> setTimeout(()=> resolve("slow"),5000))
-const clicked = new Promise(res => {
-  testh1.onclick =()=> res(Math.random())
-})
+
+// this cell is responsible for generating the laid out data when it's done being force graphed, and the makeBox function is going to depend on the result
+import {layoutData} from "./force_figure_layout.js"
+const laidOutData = layoutData(selectedFigures)
 ```
 
-```js
-testh1
-```
 
-```js
-fast
-```
-
-```js
-clicked
-```
 
 
 <div class="grid grid-cols-2">
