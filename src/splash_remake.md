@@ -197,6 +197,11 @@ const laidOutData = layoutData(selectedFigures)
 ```
 
 
+```js
+laidOutData
+```
+
+
 
 
 <div class="grid grid-cols-2">

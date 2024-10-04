@@ -149,9 +149,9 @@ export function makeChart(data, width,widthFraction) {
         .velocityDecay(0.1) // low friction
         .force("x", d3.forceX().strength(0.01))
         .force("y", d3.forceY().strength(0.01))
-        .force("collide", d3.forceCollide().radius(d => radScale(d.r) + 10).iterations(3))
+        .force("collide", d3.forceCollide().radius(d => radScale(d.r) + 10).iterations(1))
         .force("charge", d3.forceManyBody().strength((d, i) => 5))
-        .on("tick", ticked).on("end",()=>console.log("complete simulation"));
+        .on("tick", ticked);
 
     // d3.select(context.canvas)
     //     .on("touchmove", event => event.preventDefault())
