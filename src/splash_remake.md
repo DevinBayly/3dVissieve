@@ -53,7 +53,7 @@ renderer.domElement
 
 // make a geo
 const geometry = new THREE.BoxGeometry(1,1,1)
-const material = new THREE.MeshBasicMaterial({color:"red"})
+const material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),Math.random(),Math.random())})
 const cube = new THREE.Mesh(geometry,material)
 scene.add(cube)
 camera.position.z =5
@@ -75,7 +75,7 @@ renderer.setAnimationLoop(animate)
   )
 }</div>
   <div class="card">${chart_type}</div>
-  <div class="card">${resize(width=> makeBox(width))}</div>
+  <div class="card">${resize(width=> makeBox(width,chart_type))}</div>
   <div class="card"></div>
 </div>
 
