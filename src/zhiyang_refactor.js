@@ -108,7 +108,7 @@ async function initialDB(db,ctype) {
             LEFT JOIN 
                 base.paper p ON f.paper_id = p.id
             LEFT JOIN 
-                base.figure_property fp ON f.id = fp.figure_id AND fp.string_value ='${ctype}'
+                base.figure_property fp ON f.id = fp.figure_id AND fp.string_value ='${ctype}' AND fp.string_value IS NOT NULL
             ORDER BY 
                 f.id;
         `);
@@ -333,16 +333,16 @@ function loadAtlases(callback) {
 
 
 function init() {
-const loadingDiv = document.getElementById('loading');
-const threeD = document.getElementById('threeD');
-const enterButton = document.getElementById('enter');
-loadingDiv.style.width = `${threeD.offsetWidth}px`;
-loadingDiv.style.height = `${threeD.offsetHeight}px`;
-loadingDiv.style.display = "flex";
-const mapContainer = document.getElementById("mapContainer");
-mapContainer.style.width = `${canvasWidth}px`;
-mapContainer.style.height =`${canvasHeight}px`;
-const mapDom = document.getElementById("full-map");
+// const loadingDiv = document.getElementById('loading');
+// const threeD = document.getElementById('threeD');
+// const enterButton = document.getElementById('enter');
+// loadingDiv.style.width = `${threeD.offsetWidth}px`;
+// loadingDiv.style.height = `${threeD.offsetHeight}px`;
+// loadingDiv.style.display = "flex";
+// const mapContainer = document.getElementById("mapContainer");
+// mapContainer.style.width = `${canvasWidth}px`;
+// mapContainer.style.height =`${canvasHeight}px`;
+// const mapDom = document.getElementById("full-map");
 // generateScatterPlot(map, canvasWidth, canvasHeight*0.95, mapDom);
 
 
@@ -396,47 +396,47 @@ const mapDom = document.getElementById("full-map");
   setupClickEvent(sprites, camera, renderer);
   // setupCameraControl(camera, renderer);
   animate();
-   enterButton.addEventListener('click',()=>{
-    loadingDiv.classList.remove("fade-in");
-    loadingDiv.classList.add("fade-out");
-    renderer.domElement.classList.remove("hidden");
-    renderer.domElement.classList.add("visible");
-    loadingDiv.style.pointerEvents = 'none';
-    // mapContainer.classList.remove("hidden");
-    // mapContainer.classList.add("fade-in");
+//    enterButton.addEventListener('click',()=>{
+//     loadingDiv.classList.remove("fade-in");
+//     loadingDiv.classList.add("fade-out");
+//     renderer.domElement.classList.remove("hidden");
+//     renderer.domElement.classList.add("visible");
+//     loadingDiv.style.pointerEvents = 'none';
+//     // mapContainer.classList.remove("hidden");
+//     // mapContainer.classList.add("fade-in");
 
-  });
+//   });
   
-    const mapOpenButton = document.getElementById("mapButton");
-  const mapCloseButton = document.getElementById("closeButton");
-    mapCloseButton.addEventListener("click", function() {
-    //  console.log("clicked");
-    // mapContainer.classList.add("hidden");
-    // mapContainer.classList.add("fade-out");
-    // mapContainer.classList.remove("fade-in");
-    // mapContainer.classList.add("disabled");
-    mapOpenButton.style.display = 'flex';
+//     const mapOpenButton = document.getElementById("mapButton");
+//   const mapCloseButton = document.getElementById("closeButton");
+    // mapCloseButton.addEventListener("click", function() {
+    // //  console.log("clicked");
+    // // mapContainer.classList.add("hidden");
+    // // mapContainer.classList.add("fade-out");
+    // // mapContainer.classList.remove("fade-in");
+    // // mapContainer.classList.add("disabled");
+    // mapOpenButton.style.display = 'flex';
 
-    });
+    // });
 
-  mapOpenButton.addEventListener("click", function() {
-    //  console.log("clicked");
-     unSelectSprite();
-    // mapContainer.classList.remove("hidden");
-    // mapContainer.classList.remove("fade-out");
-    // mapContainer.classList.add("fade-in");
-    // mapContainer.classList.remove("disabled");
-    mapOpenButton.style.display = 'none';
+//   mapOpenButton.addEventListener("click", function() {
+//     //  console.log("clicked");
+//      unSelectSprite();
+//     // mapContainer.classList.remove("hidden");
+//     // mapContainer.classList.remove("fade-out");
+//     // mapContainer.classList.add("fade-in");
+//     // mapContainer.classList.remove("disabled");
+//     mapOpenButton.style.display = 'none';
 
-    });
-  resetButton.addEventListener('click', () =>{
-    if(isCameraMoving) return;
-    moveCamera(initialCameraPosition, initialLookAtPosition);
-    // console.log("rest button clicked");
-     unSelectSprite();
-    resetButton.style.display = 'none';
+//     });
+//   resetButton.addEventListener('click', () =>{
+//     if(isCameraMoving) return;
+//     moveCamera(initialCameraPosition, initialLookAtPosition);
+//     // console.log("rest button clicked");
+//      unSelectSprite();
+//     resetButton.style.display = 'none';
     
-  });
+//   });
 
 
 
