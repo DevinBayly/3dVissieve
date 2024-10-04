@@ -35,6 +35,7 @@ let chart_type = view(giveSvgViewReference())
   fill-opacity:1;
 }
 </style>
+## ${chart_type}s
 
 ```sql id=selectedFigures display
 SELECT f.id AS figure_id, 
@@ -72,7 +73,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 function makeBox(width) {
 const height = width
 const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75,width/height,.1,1000)
+const camera = new THREE.PerspectiveCamera(75,width/height,.1,5000)
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(width,height)
 const div = document.querySelector(".threed")
@@ -82,28 +83,117 @@ renderer.domElement
 const geometry = new THREE.BoxGeometry(1,1,1)
 const material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),Math.random(),Math.random())})
 const cube = new THREE.Mesh(geometry,material)
-scene.add(cube)
-camera.position.z =5
+// scene.add(cube)
+camera.position.z =1400
 console.log("made box")
+
+const plane = new THREE.PlaneGeometry(1,1)
+
+const geobuf = new THREE.InstancedBufferGeometry()
+geobuf.index = plane.index
+geobuf.attributes = plane.attributes
+
+
+const positions = new Float32Array(selectedFigures.numRows*3)
+
+
+
+for ( let i = 0,i3 =0; i < selectedFigures.numRows; i++,i3+=3 ) {
+
+  // positions
+
+  const x = Math.random() *2-1;
+  const y = Math.random() *2-1;
+  const z = Math.random() *2-1;
+  positions[i3+0] = x
+  positions[i3+1] = y
+  positions[i3+2] = z
+
+}
+
+function dispose() {
+  this.array=null
+}
+
+
+// changing the name of the position array to the value from the tutorial https://github.com/mrdoob/three.js/blob/dev/examples/webgl_buffergeometry_instancing_billboards.html
+geobuf.setAttribute("translate",new THREE.InstancedBufferAttribute(positions,3))
+
+// what does this do?
+geobuf.computeBoundingSphere()
+// updates the bounding box attribute if needed
+
+// vertex shader code
+const vertShader = `
+  precision highp float;
+  // these are normally included but since we are doing raw they aren't
+
+  uniform mat4 modelViewMatrix;
+  uniform mat4 projectionMatrix;
+
+  uniform float time;
+  attribute vec3 position;
+  attribute vec3 translate;
+  attribute vec2 uv;
+  varying vec2 vUV;
+  void main() {
+    vec4 mvPosition = modelViewMatrix* vec4(translate,1.0);
+    			vec3 trTime = vec3(translate.x + time,translate.y + time,translate.z + time);
+    float scale =  sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
+			float vScale = scale;
+			scale = scale * 10.0 + 10.0;
+    mvPosition.xyz+= position * scale;
+    vUV=uv;
+    gl_Position=projectionMatrix*mvPosition;
+  }
+`
+const fragShader = `
+precision highp float;
+uniform sampler2D map;
+varying vec2 vUV;
+void main() {
+  vec4 diffuseColor = texture2D(map,vUV);
+  gl_FragColor = diffuseColor;
+}
+`
+
+// make material
+const instmat = new THREE.RawShaderMaterial({
+  uniforms:{
+    'map': {value: new THREE.TextureLoader().load("./data/circle.png")},
+    'time':{value:0.0},
+  },
+    vertexShader:vertShader,
+    fragmentShader:fragShader,
+    depthTest:true,
+    depthWrite:true
+  
+})
+const instmesh = new THREE.Mesh(geobuf,instmat)
+instmesh.scale.set(500,500,500)
+scene.add(instmesh)
+
 
 // animate
 function animate() {
+  const time = performance.now() *.0005
+  instmat.uniforms["time"].value = time
+
+			instmesh.rotation.x = time * 0.2;
+			instmesh.rotation.y = time * 0.4;
   renderer.render(scene,camera)
-  cube.rotation.x += 0.01; cube.rotation.y += 0.01;
 }
 renderer.setAnimationLoop(animate)
   return renderer.domElement
 }
 ```
-<div class="grid grid-cols-4">
+<div class="grid grid-cols-2">
   <div class="card">${
   resize((width)=> 
   makeChart(chart_data,width,4)
   )
 }</div>
-  <div class="card">${chart_type}</div>
   <div class="card">${resize(width=> makeBox(width,chart_type))}</div>
-  <div class="card"></div>
 </div>
 
 
