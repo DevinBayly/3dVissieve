@@ -1,15 +1,20 @@
 import * as d3 from "npm:d3"
 import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 
+var svg,htmlNode
+export function giveSvgViewReference() {
+    svg = d3.create("svg")
+    // using this to help with the view process
+    htmlNode = svg.node()
+    htmlNode.value="line_chart"
+    return htmlNode
+}
 
-export function makeChart(data, width,reactive_variable,chart_type) {
+export function makeChart(data, width) {
+    svg.select("g").remove()
     const height = width;
     const color = d3.scaleOrdinal(d3.schemeTableau10);
     // make a standard circles d3 chart
-    let svg = d3.create("svg")
-    // using this to help with the view process
-    let htmlNode = svg.node()
-    htmlNode.value="line_chart"
     svg.attr("width", width)
     svg.attr("height", height)
     const nodes = data.map(Object.create);

@@ -5,7 +5,7 @@ sql:
   publications: ./data/new_layout.db
 ---
 ```js
-import {makeForceCollide,makeChart} from "./force_collide.js"
+import {makeForceCollide,makeChart,giveSvgViewReference} from "./force_collide.js"
 ```
 
 
@@ -30,8 +30,10 @@ radScale.range([40,100])
 let chart_data = json_data.map(e=>({...e, r:radScale(e.num)}))
 // make a observed variable that we can do things with later in the file
 // let chart_type= Generators.observe(notifyChartType)
-let chart = makeChart(chart_data,800)
-let chart_type = view(chart)
+
+// 
+// setup so that we can have view, and later configure for resize
+let chart_type = view(giveSvgViewReference())
 ```
 
 <style>
@@ -42,11 +44,41 @@ let chart_type = view(chart)
 
 
 
-```html
-<div class="card">
-  ${chart}
-</div>
-<div class="card">
- ${chart_type}
-<div>
+```js
+const height = width
+import * as THREE from 'npm:three';
+import { CSS2DRenderer,CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(75,width/height,.1,1000)
+const renderer = new THREE.WebGLRenderer()
+renderer.setSize(width,height)
+const div = document.querySelector(".threed")
+renderer.domElement
+
+// make a geo
+const geometry = new THREE.BoxGeometry(1,1,1)
+const material = new THREE.MeshBasicMaterial({color:"red"})
+const cube = new THREE.Mesh(geometry,material)
+scene.add(cube)
+camera.position.z =5
+
+// animate
+function animate() {
+  renderer.render(scene,camera)
+  cube.rotation.x += 0.01; cube.rotation.y += 0.01;
+}
+renderer.setAnimationLoop(animate)
 ```
+<div class="grid grid-cols-4">
+  <div class="card">${
+  resize((width)=> {
+  makeChart(chart_data,width)
+  })
+}</div>
+  <div class="card">${chart_type}</div>
+  <div class="card">${renderer.domElement}</div>
+  <div class="card"></div>
+</div>
+
+
