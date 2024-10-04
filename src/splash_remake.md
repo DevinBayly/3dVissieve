@@ -65,6 +65,10 @@ SELECT f.id AS figure_id,
                 f.id;
 ```
 
+```sql
+SELECT COUNT(*) FROM publications.figure_property fp WHERE fp.string_value = ${chart_type} AND fp.string_value IS NOT NULL
+
+```
 
 ```js
 import * as THREE from 'npm:three';
