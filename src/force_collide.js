@@ -6,7 +6,7 @@ export function giveSvgViewReference() {
     svg = d3.create("svg")
     // using this to help with the view process
     htmlNode = svg.node()
-    htmlNode.value = "line_chart"
+    // htmlNode.value = "line_chart"
     return htmlNode
 }
 

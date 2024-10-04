@@ -92,7 +92,7 @@ const cube = new THREE.Mesh(geometry,material)
 camera.position.z =80
 console.log("made box")
 
-const plane = new THREE.PlaneGeometry(1,1)
+const plane = new THREE.PlaneGeometry(3,3)
 
 const geobuf = new THREE.InstancedBufferGeometry()
 geobuf.index = plane.index
@@ -143,7 +143,9 @@ const vertShader = `
     float scale =  sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
 			float vScale = scale;
 			scale = scale * 10.0 + 10.0;
-    mvPosition.xyz+= position * scale;
+    // to make things pulse bigger and smaller
+    //mvPosition.xyz+= position * scale;
+    mvPosition.xyz+= position ;
     vUV=uv;
     gl_Position=projectionMatrix*mvPosition;
   }
@@ -197,12 +199,6 @@ renderer.setAnimationLoop(animate)
 import {layoutData} from "./force_figure_layout.js"
 const laidoutData = layoutData(selectedFigures)
 ```
-
-
-```js
-laidoutData
-```
-
 
 
 
