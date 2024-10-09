@@ -53,13 +53,29 @@ function createWorkerFrom() {
 
 const worker = createWorkerFrom()
 
-function messaged(event) {
-    console.log("message",event)
-}
+const nodesLaidOut = new Promise(resolve => {
+    function messaged(event) {
+        console.log("message",event)
+        // use the resolve function when we get the message about the nodes being done
+        if (event.data.type == "done") {
+            resolve(event.data.nodes)
+        }
+    }
+    // now set up things like listening for the worker to change things
+    worker.addEventListener("message",messaged)
+    // start things up
+    worker.postMessage({nodes})
+    // invalidation.then(()=> worker.terminate())
+})
 
-// now set up things like listening for the worker to change things
-worker.addEventListener("message",messaged)
-// start things up
-worker.postMessage({nodes})
-// invalidation.then(()=> worker.terminate())
+```
+
+```js
+nodesLaidOut
+```
+
+```js
+Plot.plot({
+    marks:[Plot.dot(nodesLaidOut,{x:"x",y:"y"})]
+})
 ```

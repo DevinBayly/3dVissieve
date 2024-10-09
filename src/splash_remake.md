@@ -162,8 +162,10 @@ renderer.setAnimationLoop(animate)
 ```js
 
 // this cell is responsible for generating the laid out data when it's done being force graphed, and the makeBox function is going to depend on the result
-import {layoutData} from "./force_figure_layout.js"
-const laidoutData = layoutData(selectedFigures)
+// import {layoutData} from "./force_figure_layout.js"
+// const laidoutData = layoutData(selectedFigures)
+
+// do the same process with background running and see if we can give periodic updates to the screen
 ```
 
 
