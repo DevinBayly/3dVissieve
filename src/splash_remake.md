@@ -40,121 +40,143 @@ let chart_type = view(giveSvgViewReference())
 import * as THREE from 'npm:three';
 import { CSS2DRenderer,CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-function makeBox(width,data) {
-const height = width
-const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75,width/height,.1,5000)
-const renderer = new THREE.WebGLRenderer()
-renderer.setSize(width,height)
-const div = document.querySelector(".threed")
-const controls = new OrbitControls(camera,renderer.domElement)
-controls.update()
+function threejsRenderer() {
+  let scene,camera,renderer,geobuf,instmat,instmesh
+  let init = (width)  => {
+    const height = width
+    scene = new THREE.Scene()
+    camera = new THREE.PerspectiveCamera(75,width/height,.1,5000)
+    renderer = new THREE.WebGLRenderer()
+    renderer.setSize(width,height)
+    const div = document.querySelector(".threed")
+    const controls = new OrbitControls(camera,renderer.domElement)
+    controls.update()
 
-// make a geo
-const geometry = new THREE.BoxGeometry(1,1,1)
-const material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),Math.random(),Math.random())})
-const cube = new THREE.Mesh(geometry,material)
-// scene.add(cube)
-camera.position.z =80
-console.log("made box")
+    // make a geo
+    const geometry = new THREE.BoxGeometry(1,1,1)
+    const material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),Math.random(),Math.random())})
+    const cube = new THREE.Mesh(geometry,material)
+    // scene.add(cube)
+    camera.position.z =80
+    console.log("made box")
 
-const plane = new THREE.PlaneGeometry(3,3)
+    const plane = new THREE.PlaneGeometry(3,3)
 
-const geobuf = new THREE.InstancedBufferGeometry()
-geobuf.index = plane.index
-geobuf.attributes = plane.attributes
-
-
-const positions = new Float32Array(data.length*3)
-
+    geobuf = new THREE.InstancedBufferGeometry()
+    geobuf.index = plane.index
+    geobuf.attributes = plane.attributes
 
 
-for ( let i = 0; i < data.length; i++) {
-
-  let d = data[i]
-  positions[i*3+0] = d.x
-  positions[i*3+1] = 0
-  positions[i*3+2] = d.y
-
-}
-
-function dispose() {
-  this.array=null
-}
+    const positions = new Float32Array(1000)
 
 
-// changing the name of the position array to the value from the tutorial https://github.com/mrdoob/three.js/blob/dev/examples/webgl_buffergeometry_instancing_billboards.html
-geobuf.setAttribute("translate",new THREE.InstancedBufferAttribute(positions,3))
 
-// what does this do?
-geobuf.computeBoundingSphere()
-// updates the bounding box attribute if needed
+    for ( let i = 0; i < 1000; i++) {
 
-// vertex shader code
-const vertShader = `
-  precision highp float;
-  // these are normally included but since we are doing raw they aren't
+      positions[i*3+0] = 0
+      positions[i*3+1] = 0
+      positions[i*3+2] = 0
 
-  uniform mat4 modelViewMatrix;
-  uniform mat4 projectionMatrix;
+    }
 
-  uniform float time;
-  attribute vec3 position;
-  attribute vec3 translate;
-  attribute vec2 uv;
-  varying vec2 vUV;
-  void main() {
-    vec4 mvPosition = modelViewMatrix* vec4(translate,1.0);
-    			vec3 trTime = vec3(translate.x + time,translate.y + time,translate.z + time);
-    float scale =  sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
-			float vScale = scale;
-			scale = scale * 10.0 + 10.0;
-    // to make things pulse bigger and smaller
-    //mvPosition.xyz+= position * scale;
-    mvPosition.xyz+= position ;
-    vUV=uv;
-    gl_Position=projectionMatrix*mvPosition;
+    function dispose() {
+      this.array=null
+    }
+
+
+    // changing the name of the position array to the value from the tutorial https://github.com/mrdoob/three.js/blob/dev/examples/webgl_buffergeometry_instancing_billboards.html
+    geobuf.setAttribute("translate",new THREE.InstancedBufferAttribute(positions,3))
+
+    // what does this do?
+    geobuf.computeBoundingSphere()
+    // updates the bounding box attribute if needed
+
+    // vertex shader code
+    const vertShader = `
+      precision highp float;
+      // these are normally included but since we are doing raw they aren't
+
+      uniform mat4 modelViewMatrix;
+      uniform mat4 projectionMatrix;
+
+      uniform float time;
+      attribute vec3 position;
+      attribute vec3 translate;
+      attribute vec2 uv;
+      varying vec2 vUV;
+      void main() {
+        vec4 mvPosition = modelViewMatrix* vec4(translate,1.0);
+              vec3 trTime = vec3(translate.x + time,translate.y + time,translate.z + time);
+        float scale =  sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
+          float vScale = scale;
+          scale = scale * 10.0 + 10.0;
+        // to make things pulse bigger and smaller
+        //mvPosition.xyz+= position * scale;
+        mvPosition.xyz+= position ;
+        vUV=uv;
+        gl_Position=projectionMatrix*mvPosition;
+      }
+    `
+    const fragShader = `
+    precision highp float;
+    uniform sampler2D map;
+    varying vec2 vUV;
+    void main() {
+      vec4 diffuseColor = texture2D(map,vUV);
+      gl_FragColor = diffuseColor;
+    }
+    `
+
+    // make material
+    instmat = new THREE.RawShaderMaterial({
+      uniforms:{
+        'map': {value: new THREE.TextureLoader().load("./data/circle.png")},
+        'time':{value:0.0},
+      },
+        vertexShader:vertShader,
+        fragmentShader:fragShader,
+        depthTest:true,
+        depthWrite:true
+      
+    })
+    instmesh = new THREE.Mesh(geobuf,instmat)
+    // instmesh.scale.set(500,500,500)
+    scene.add(instmesh)
+
+
+    // animate
+    function animate() {
+      const time = performance.now() *.0005
+      instmat.uniforms["time"].value = time
+
+          // instmesh.rotation.x = time * 0.2;
+          // instmesh.rotation.y = time * 0.4;
+      renderer.render(scene,camera)
+    }
+    renderer.setAnimationLoop(animate)
+      controls.update()
+      return renderer.domElement
+      }
+  let updatePositions = (data)=> {
+    // use the mesh to get geometry and use getAttribute to get the translate attribute that we want to update
+    if (instmesh) {
+      let translateAttribute = instmesh.geometry.getAttribute("translate")
+      // the type of the above is an InstancedBufferAttribute which we might be able to update the array value of without breaking connections
+      // now set these new values
+      const positions = new Float32Array(data.length*3)
+      for ( let i = 0; i < data.length; i++) {
+
+        let d = data[i]
+        positions[i*3+0] = d.x
+        positions[i*3+1] = 0
+        positions[i*3+2] = d.y
+
+      }
+      translateAttribute.array = positions
+      translateAttribute.needsUpdate()
+    }
   }
-`
-const fragShader = `
-precision highp float;
-uniform sampler2D map;
-varying vec2 vUV;
-void main() {
-  vec4 diffuseColor = texture2D(map,vUV);
-  gl_FragColor = diffuseColor;
-}
-`
-
-// make material
-const instmat = new THREE.RawShaderMaterial({
-  uniforms:{
-    'map': {value: new THREE.TextureLoader().load("./data/circle.png")},
-    'time':{value:0.0},
-  },
-    vertexShader:vertShader,
-    fragmentShader:fragShader,
-    depthTest:true,
-    depthWrite:true
-  
-})
-const instmesh = new THREE.Mesh(geobuf,instmat)
-// instmesh.scale.set(500,500,500)
-scene.add(instmesh)
-
-
-// animate
-function animate() {
-  const time = performance.now() *.0005
-  instmat.uniforms["time"].value = time
-
-			// instmesh.rotation.x = time * 0.2;
-			// instmesh.rotation.y = time * 0.4;
-  renderer.render(scene,camera)
-}
-renderer.setAnimationLoop(animate)
-  controls.update()
-  return renderer.domElement
+  return {init,updatePositions}
 }
 // make a function that receives the data that's selected from the bubble layout, and runs the layout system, providing the make box function as a callback
 ```
@@ -166,17 +188,32 @@ renderer.setAnimationLoop(animate)
 // const laidoutData = layoutData(selectedFigures)
 
 // do the same process with background running and see if we can give periodic updates to the screen
+
+
+
+import {backgroundDataLayout} from "./background_worker_force.js"
+// make the inputs just an array as long as the selected data element
+const nodes = Array.from({length:selectedFigures.numRows} ,(_,i) => ({index:i}))
+const laidoutData = backgroundDataLayout(nodes)
+
 ```
 
+```js
+laidoutData
+```
 
-
+```js
+const myThreeJsRenderer = new threejsRenderer()
+// call the update function when the laidout data is ready
+// myThreeJsRenderer.updatePositions(laidoutData)
+```
 <div class="grid grid-cols-2">
   <div class="card">${
   resize((width)=> 
   makeChart(chart_data,width,4)
   )
 }</div>
-  <div class="card">${resize(width=> makeBox(width,laidoutData))}</div>
+  <div class="card">${resize(width=> myThreeJsRenderer.init(width))}</div>
 </div>
 
 
