@@ -41,7 +41,7 @@ import * as THREE from 'npm:three';
 import { CSS2DRenderer,CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 function threejsRenderer() {
-  let scene,camera,renderer,geobuf,instmat,instmesh
+  let scene,camera,renderer,geobuf,instmat,instmesh,positions
   let init = (width)  => {
     const height = width
     scene = new THREE.Scene()
@@ -67,11 +67,13 @@ function threejsRenderer() {
     geobuf.attributes = plane.attributes
 
 
-    const positions = new Float32Array(1000)
+    // make the positions array much bigger than needed
+    const number_images = 5000
+    positions = new Float32Array(number_images*3)
 
 
 
-    for ( let i = 0; i < 1000; i++) {
+    for ( let i = 0; i < number_images; i++) {
 
       positions[i*3+0] = 0
       positions[i*3+1] = 0
@@ -148,7 +150,7 @@ function threejsRenderer() {
     function animate() {
       const time = performance.now() *.0005
       instmat.uniforms["time"].value = time
-
+      controls.update()
           // instmesh.rotation.x = time * 0.2;
           // instmesh.rotation.y = time * 0.4;
       renderer.render(scene,camera)
@@ -163,7 +165,7 @@ function threejsRenderer() {
       let translateAttribute = instmesh.geometry.getAttribute("translate")
       // the type of the above is an InstancedBufferAttribute which we might be able to update the array value of without breaking connections
       // now set these new values
-      const positions = new Float32Array(data.length*3)
+      // const positions = new Float32Array(data.length*3)
       for ( let i = 0; i < data.length; i++) {
 
         let d = data[i]
@@ -172,8 +174,9 @@ function threejsRenderer() {
         positions[i*3+2] = d.y
 
       }
-      translateAttribute.array = positions
-      translateAttribute.needsUpdate()
+      // translateAttribute.array = positions
+      translateAttribute.needsUpdate = true
+      instmesh.geometry.computeBoundingBox(); instmesh.geometry.computeBoundingSphere();
     }
   }
   return {init,updatePositions}
@@ -216,6 +219,9 @@ const myThreeJsRenderer = new threejsRenderer()
   <div class="card">${resize(width=> myThreeJsRenderer.init(width))}</div>
 </div>
 
+```js
+myThreeJsRenderer.updatePositions(laidoutData)
+```
 
 
 ```sql id=type_counts
